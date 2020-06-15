@@ -27,5 +27,10 @@
 	<classpathentry kind="lib" path="libs/slf4j-api-1.7.25.jar"/>
 	<classpathentry kind="lib" path="libs/tess4j-3.3.1.jar"/>
 	<classpathentry kind="lib" path="libs/xmlgraphics-commons-1.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Wilson/Eclipse-Work/TextRecognitionProject/libs/opencv-3410.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/opencv/build/java/x64"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
