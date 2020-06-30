@@ -14,13 +14,17 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -38,11 +42,16 @@ public class ImageRecognitionMain extends Application {
 	private static final double HEIGHT = 60;
 	private static final double SCALE = 8;
 
-	TextArea txtArea = new TextArea();
+	// TextArea txtArea = new TextArea();
+	private TableView<TableContent> table = new TableView<TableContent>();
+
+	private final ObservableList<TableContent> data = FXCollections.observableArrayList(
+			new TableContent("Jacob", "Smith", "jacob.smith@example.com"),
+			new TableContent("Isabella", "Johnson", "isabella.johnson@example.com"));
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		
+
 		BorderPane root = new BorderPane();
 		primaryStage.setTitle("Image Recognition Project");
 		primaryStage.setScene(createScene(root, WIDTH * SCALE, HEIGHT * SCALE));
@@ -51,18 +60,32 @@ public class ImageRecognitionMain extends Application {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private Scene createScene(BorderPane root, double cWidth, double cHeight) {
+
+		table.setEditable(true);
+
+		TableColumn<TableContent, String> c1 = new TableColumn<TableContent, String>("column one");
+		c1.setMinWidth(100 * 3);
+		c1.setCellValueFactory(new PropertyValueFactory<TableContent, String>("col1"));
+
+		TableColumn<TableContent, String> c2 = new TableColumn<TableContent, String>("column two");
+		c2.setMinWidth(100 * 3);
+		c2.setCellValueFactory(new PropertyValueFactory<TableContent, String>("col2"));
+
+		TableColumn<TableContent, String> c3 = new TableColumn<TableContent, String>("column three");
+		c3.setMinWidth(100 * 3);
+		c3.setCellValueFactory(new PropertyValueFactory<TableContent, String>("col3"));
+
+		table.setItems(data);
+		table.getColumns().addAll(c1, c2, c3);
 
 		// File("C:\\Users\\Wilson\\Eclipse-Work\\TextRecognitionProject\\src\\res\\images\\prueba.png");
 		Image image = new Image(getClass().getResource("/res/images/prueba2.jpg").toExternalForm());
 		ImageView imageView = new ImageView();
 		imageView.setImage(image);
-		ScrollPane sp = new ScrollPane();
-		sp.setContent(imageView);
-		sp.setHbarPolicy(ScrollBarPolicy.ALWAYS);
-		sp.setVbarPolicy(ScrollBarPolicy.ALWAYS);
 
-		final Rectangle rectangle = new Rectangle(50, 50);
+		final Rectangle rectangle = new Rectangle(50, 20);
 		rectangle.setFill(Color.TRANSPARENT);
 		rectangle.setStroke(Color.web("#2c3e50"));
 		rectangle.setStrokeWidth(3);
@@ -127,14 +150,20 @@ public class ImageRecognitionMain extends Application {
 							Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 7, 1);
 					Imgcodecs.imwrite("src\\res\\images\\07_opencv_adaptative_in.jpg", imgAdaptiveThresholdIn);
 					System.out.println("save 07_opencv_adaptative_in.jpg");
-					
+
 					Mat imgAdaptiveThresholdNew = new Mat();
 					Imgproc.adaptiveThreshold(imgAdaptiveThresholdIn, imgAdaptiveThresholdNew, 255,
 							Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 99, 4);
 					Imgcodecs.imwrite("src\\res\\images\\08_opencv_adaptative_new.jpg", imgAdaptiveThresholdNew);
 					System.out.println("save 08_opencv_adaptative_new.jpg");
 
-					//URL imageURL = getClass().getResource("/res/images/06_opencv_adaptative.jpg");
+					Mat imgCanny = new Mat();
+					Imgproc.Canny(imgGray, imgCanny, 10, 30);
+					Imgcodecs.imwrite("src\\res\\images\\09_opencv_canny.jpg", imgCanny);
+					System.out.println("save 09_opencv_canny.jpg");
+
+					// URL imageURL =
+					// getClass().getResource("/res/images/06_opencv_adaptative.jpg");
 					URL imageURL = getClass().getResource("/res/images/07_opencv_adaptative_in.jpg");
 					System.out.println("resource image: " + imageURL.getPath());
 					// File imageFile = new File("src\\res\\images\\prueba.png");
@@ -161,26 +190,29 @@ public class ImageRecognitionMain extends Application {
 					String result = instance.doOCR(subImg).trim();
 					System.out.println(result);
 
-					txtArea.appendText(result);
+					data.add(new TableContent(result, "none", "none"));
 
 				} catch (TesseractException ex) {
 					System.err.println(ex.getMessage());
-					txtArea.appendText(ex.getMessage());
 				} catch (IOException io) {
 					System.err.println(io.getMessage());
-					txtArea.appendText(io.getMessage());
 				}
 			}
 		});
 
+		ScrollPane sp = new ScrollPane();
+		sp.setContent(imageView);
+		sp.setHbarPolicy(ScrollBarPolicy.ALWAYS);
+		sp.setVbarPolicy(ScrollBarPolicy.ALWAYS);
+
 		Pane content = new Pane();
-		content.getChildren().addAll(rectangle, btn);
+		content.getChildren().addAll(rectangle);
 
-		txtArea.setPrefHeight(HEIGHT * 2);
-
+		root.setRight(btn);
+		table.setPrefHeight(HEIGHT * 3);
 		root.setCenter(sp);
 		root.getChildren().add(content);
-		root.setBottom(txtArea);
+		root.setBottom(table);
 
 		Scene scene = new Scene(root, cWidth, cHeight);
 
